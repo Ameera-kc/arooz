@@ -1,4 +1,4 @@
-from django.urls import path,include
+from django.urls import path
 from . import views
 
 app_name = "user"
@@ -54,7 +54,7 @@ urlpatterns = [
     path("shop-list", views.shop_list, name="shop_list"),
     path("shop-right-sidebar", views.shop_right_sidebar, name="shop_right_sidebar"),
     path("shop-top-filter", views.shop_top_filter, name="shop_top_filter"),
-    path("sign-up", views.user_register, name="sign_up"),
+    path("sign-up", views.sign_up, name="sign_up"),
     path("dashboard", views.user_dashboard, name="dashboard"),
     path("wishlist/<int:id>", views.addtowishlist, name="addtowishlist"),
     path("wishlist",views.viewwishlist,name="viewwishlist"),

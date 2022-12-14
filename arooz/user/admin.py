@@ -1,8 +1,7 @@
 from django.contrib import admin
-from user.models import Customer, Login, Category, SubCategory, Product, MainBanner, SubBanners1, SubBanners2, HeaderFlash
-from user.models import Cart, Wishlist, AddToCart, ChangePassword, Measurements, Size,Event,AdminNumber
+from user.models import Login, Category, SubCategory, Product, MainBanner, SubBanners1, SubBanners2, HeaderFlash
+from user.models import Cart, Wishlist, AddToCart, ChangePassword, Measurements, Size, Event, AdminNumber, AvailableSizes
 # Register your models here.
-admin.site.register(Customer)
 admin.site.register(Category)
 admin.site.register(SubCategory)
 admin.site.register(Product)
@@ -20,3 +19,4 @@ admin.site.register(AdminNumber)
 admin.site.register(Measurements)
 admin.site.register(Size)
 admin.site.register(Event)
+admin.site.register(AvailableSizes)

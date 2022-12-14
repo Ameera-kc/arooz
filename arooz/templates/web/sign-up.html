@@ -102,29 +102,29 @@
                                 {% csrf_token %}
                                 <div class="col-12">
                                     <div class="form-floating theme-form-floating">
-                                        {% comment %} <input type="text" class="form-control" name="fullname" placeholder="Full Name" value={{user_form.customer_name}}> {% endcomment %}
-                                        {{user_form.customer_name}}
+                                        <input type="text" class="form-control" name="fullname" placeholder="Full Name">
+                                        {% comment %} {{user_form.customer_name}} {% endcomment %}
                                         <label for="fullname">Full Name</label>
                                     </div>
                                 </div>
                                 <div class="col-12">
                                     <div class="form-floating theme-form-floating">
-                                        {% comment %} <input type="email" class="form-control" name="email" placeholder="Email Address" value={{user_form.email}}> {% endcomment %}
-                                        {{user_form.email}}
+                                        <input type="email" class="form-control" name="email" placeholder="Email Address">
+                                        {% comment %} {{user_form.email}} {% endcomment %}
                                         <label for="email">Email Address</label>
                                     </div>
                                 </div>
                                 <div class="col-12">
                                     <div class="form-floating theme-form-floating">
-                                        {% comment %} <input type="text" class="form-control" name="number" placeholder="Phone Number"> {% endcomment %}
-                                        {{user_form.phone_number}}
+                                        <input type="text" class="form-control" name="number" placeholder="Phone Number">
+                                        {% comment %} {{user_form.phone_number}} {% endcomment %}
                                         <label for="number">Phone Number</label>
                                     </div>
                                 </div>
                                 <div class="col-12">
                                     <div class="form-floating theme-form-floating">
-                                        {% comment %} <input type="text" class="form-control" name="address" placeholder="Address" value={{user_form.address}}> {% endcomment %}
-                                        {{user_form.address}}
+                                        <input type="text" class="form-control" name="address" placeholder="Address">
+                                        {% comment %} {{user_form.address}} {% endcomment %}
                                         <label for="Address">Address</label>
                                     </div>
                                 </div>
@@ -132,29 +132,22 @@
                                
 
 
-                                <!-- login section -->
-                                <div class="col-12">
-                                    <div class="form-floating theme-form-floating">
-                                        {% comment %} <input type="text" class="form-control" name="username" placeholder="Address" value={{login_form.username}}> {% endcomment %}
-                                        {{login_form.username}}
-                                        <label for="Address">Username</label>
-                                    </div>
-                                </div>
+                               
 
                                 <div class="col-12">
                                     <div class="form-floating theme-form-floating">
-                                        {% comment %} <input type="password" class="form-control" name="password"
-                                            placeholder="Password" value={{login_form.password1}}> {% endcomment %}
-                                            {{login_form.password1}}
+                                        <input type="password" class="form-control" name="password"
+                                            placeholder="Password">
+                                            {% comment %} {{login_form.password1}} {% endcomment %}
                                         <label for="password">Password</label>
                                     </div>
                                 </div>
 
                                 <div class="col-12">
                                     <div class="form-floating theme-form-floating">
-                                         {% comment %} <input type="password" class="form-control" name="password2"
-                                            placeholder="Confirm Password" value={{login_form.password2}}>  {% endcomment %}
-                                             {{login_form.password2}} 
+                                         <input type="password" class="form-control" name="password2"
+                                            placeholder="Confirm Password"> 
+                                             {% comment %} {{login_form.password2}}  {% endcomment %}
                                             <label for="password2">Confirm Password</label>
                                     </div>
                                 </div>
@@ -167,18 +160,6 @@
                                     {% endfor %}
                                     {% endif %}
                                 </div>
-
-                                <div class="col-12">
-                                    <div class="forgot-box">
-                                        <div class="form-check ps-0 m-0 remember-box">
-                                            <input class="checkbox_animated check-box" type="checkbox"
-                                                id="flexCheckDefault">
-                                            <label class="form-check-label" for="flexCheckDefault">I agree with
-                                                <span>Terms</span> and <span>Privacy</span></label>
-                                        </div>
-                                    </div>
-                                </div>
-                               
 
                                 <div class="col-12">
                                     <button class="btn btn-animation w-100" type="submit">Sign Up</button>

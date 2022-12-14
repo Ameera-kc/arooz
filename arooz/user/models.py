@@ -1,35 +1,27 @@
 from django.db import models
 from versatileimagefield.fields import VersatileImageField
-from tinymce.models import HTMLField
 from django.urls import reverse_lazy
-from django.conf import settings
-from django.contrib.auth.models import (
-    AbstractUser,
- )
 
 # Create your models here.
 
-
-class Login(AbstractUser):
-    is_customer = models.BooleanField(default=False)
     
 
-class Customer(models.Model):
-    user = models.OneToOneField(Login, on_delete=models.CASCADE, related_name='user')
-    customer_name = models.CharField(max_length = 100,null=True)
-    phone_number = models.CharField(default=0, null=True, max_length=10, unique = True)  
-    email = models.EmailField(max_length=254,null=True)
-    address = models.CharField(max_length = 250)
+class Login(models.Model):
+    customer_name = models.CharField(max_length = 100,null=True,blank=True)
+    password = models.CharField(max_length = 100,null=True,blank=True)
+    phone_number = models.CharField(null=True, blank=True, max_length=10, unique = True)  
+    email = models.EmailField(max_length=254,null=True, blank=True)
+    address = models.CharField(max_length = 250,null=True,blank=True)
   
     
 class AdminNumber(models.Model):
     name = models.CharField(max_length=20)
     phone_number=models.CharField(max_length=12)    
     
+    
 class Category(models.Model):
     category = models.CharField(max_length = 200, unique=True)
     image = VersatileImageField(upload_to="categories/", null=True)
-    
     
     
     def get_absolute_url(self):
@@ -66,7 +58,7 @@ class SubCategory(models.Model):
 
     
 class Product(models.Model):
-    # user=models.ForeignKey(Customer, on_delete=models.CASCADE, null=True,default='')
+    # user=models.ForeignKey(Login, on_delete=models.CASCADE, null=True,default='')
     product = models.CharField(max_length = 150)
     image = VersatileImageField(upload_to="products/", null=True)
     sub_image1 = VersatileImageField(upload_to="products/", null=True,blank=True)
@@ -82,6 +74,9 @@ class Product(models.Model):
     is_top_save_today= models.BooleanField(default = False)
     is_best_seller = models.BooleanField(default = False)
         
+    def get_sizes(self):
+        return AvailableSizes.objects.filter(product=self) 
+    
     def __str__(self):
         return self.product
     
@@ -107,8 +102,8 @@ class SubBanners2(models.Model):
 
 
 class HeaderFlash(models.Model):
-    address =  models.CharField(max_length = 150)
-    offer_product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True)
+    address =  models.CharField(max_length = 250)
+    # offer_product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True)
     
     def __str__(self):
         return self.address
@@ -119,7 +114,7 @@ class HeaderFlash(models.Model):
     
     
 class Cart(models.Model):
-    user = models.ForeignKey(Customer,on_delete=models.CASCADE, null=True,default='')
+    user = models.ForeignKey(Login,on_delete=models.CASCADE, null=True,default='')
     product = models.ForeignKey(Product,on_delete=models.CASCADE)
     product_qty=models.IntegerField(null=False,blank=False)
     added_date = models.DateTimeField(auto_now_add=True)
@@ -129,7 +124,7 @@ class Cart(models.Model):
     
      
 class Wishlist(models.Model):
-    user = models.ForeignKey(Customer,on_delete=models.CASCADE, null=True,default='')
+    user = models.ForeignKey(Login,on_delete=models.CASCADE, null=True,default='')
     product = models.ForeignKey(Product,on_delete=models.CASCADE,default='',null=True,blank=True)
     added_date = models.DateTimeField(auto_now_add=True)
     
@@ -139,7 +134,7 @@ class Wishlist(models.Model):
 
 
 class ChangePassword(models.Model):
-    user = models.ForeignKey(Customer,on_delete=models.CASCADE, blank=True, null=True)
+    user = models.ForeignKey(Login,on_delete=models.CASCADE, blank=True, null=True)
     forgot_password_token = models.CharField(max_length=100)
     created_at = models. DateTimeField(auto_now_add = True)
     status = models.BooleanField(default=False)
@@ -155,7 +150,7 @@ def get_absolute_url(self):
 
        
 class Measurements(models.Model):
-    user = models.ForeignKey(Customer,on_delete=models.CASCADE, null=True,default='')
+    user = models.ForeignKey(Login,on_delete=models.CASCADE, null=True,default='')
     product = models.ForeignKey(Product,on_delete=models.CASCADE, null=True,default='')
     sleevelength = models.CharField(max_length = 150,null=True, default=0 )
     chestaround = models.CharField(max_length = 150,null=True, default=0 )
@@ -170,7 +165,7 @@ class Measurements(models.Model):
         return self.user.customer_name
     
 class Size(models.Model):
-    user = models.ForeignKey(Customer,on_delete=models.CASCADE, null=True,default='')
+    user = models.ForeignKey(Login,on_delete=models.CASCADE, null=True,default='')
     product = models.ForeignKey(Product,on_delete=models.CASCADE, null=True,default='')
     size = models.CharField(max_length = 150,null=True, default=0 )
     
@@ -178,7 +173,7 @@ class Size(models.Model):
         return self.user.customer_name
     
 class Event(models.Model):
-    user = models.ForeignKey(Customer,on_delete=models.CASCADE, null=True,default='')
+    user = models.ForeignKey(Login,on_delete=models.CASCADE, null=True,default='')
     product = models.ForeignKey(Product,on_delete=models.CASCADE, null=True,default='')
     date = models.DateField()
     
@@ -186,7 +181,7 @@ class Event(models.Model):
         return self.user.customer_name
 
 class AddToCart(models.Model):
-    user = models.ForeignKey(Customer,on_delete=models.CASCADE, null=True,default='')
+    user = models.ForeignKey(Login,on_delete=models.CASCADE, null=True,default='')
     product = models.ForeignKey(Product,on_delete=models.CASCADE)
     event = models.ForeignKey(Event,on_delete=models.CASCADE,null=True,default='')
     added_date = models.DateTimeField(auto_now_add=True)
@@ -196,3 +191,13 @@ class AddToCart(models.Model):
    
     def __str__(self):
         return self.product.product
+
+
+class AvailableSizes(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    size = models.CharField(max_length=3)
+
+    
+    def __str__(self):
+        return self.size
+    

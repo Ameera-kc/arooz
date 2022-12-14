@@ -1,10 +1,8 @@
 from django.shortcuts import render, redirect
-from .forms import LoginRegister, UserRegistration
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth import authenticate, login
 from django.contrib import messages
 from . models import MainBanner, Product, SubCategory, Category, SubBanners1, SubBanners2
-from . models import Wishlist, Customer, AddToCart, ChangePassword, AdminNumber, Measurements, Size, Event
+from . models import Wishlist, AddToCart, ChangePassword, AdminNumber, Measurements, Size, Event, Login
 from .helper import send_forget_password_mail
 import uuid
 from django.contrib.auth import logout
@@ -25,48 +23,20 @@ def login_views(request):
     if request.method == 'POST':
         username = request.POST.get('uname')
         password = request.POST.get('pass')
-        
-        user = authenticate(request, username=username, password=password)
-        
+        user = Login.get(customer_name = username, password=password)
         if user is not None:
-            login(request, user)
-            if user.is_customer:
-                return redirect('/')
+            return redirect('/')
         else:
             messages.info(request, 'Invalid Credentials')
     return render(request, 'web/login.html')
 
-@csrf_exempt
-def user_register(request):
-    login_form = LoginRegister()
-    user_form = UserRegistration()
-  
-    if request.method == "POST":
-        login_form = LoginRegister(request.POST)
-        
-        user_form = UserRegistration(request.POST)
-        
-        if login_form.is_valid() and user_form.is_valid():
-            
-            user = login_form.save(commit=False)
-            user.is_customer = True
-            user.save()
-           
-            c = user_form.save(commit=False)
-            c.user = user
-            c.save()
-            
-            messages.info(request, 'User Registration Successfull')
-            return redirect('user:login')
-        messages.info(request, 'password must contain 8 characters with atleast 1 digit and 1 special character')
-        return redirect('user:sign_up')
-    return render(request, 'web/sign-up.html', {'login_form': login_form, 'user_form': user_form})
+
 
 
 def forget_password(request):
     if request.method == 'POST':
         email = request.POST.get('email')
-        user_obj = Customer.objects.get(email=email)
+        user_obj = Login.objects.get(email=email)
         
         token = str(uuid.uuid4())
         ChangePassword.objects.create(user=user_obj,forgot_password_token=token)
@@ -88,12 +58,12 @@ def change_password(request,token):
     
     if change_password_obj.user:
         
-        customer = Customer.objects.all()
+        customer = Login.objects.all()
         for customer in customer:
             if change_password_obj.user == customer:
                 if change_password_obj.user.email == customer.email:
                     
-                    user_id=Customer.objects.filter(email=change_password_obj.user.email).first()
+                    user_id=Login.objects.filter(email=change_password_obj.user.email).first()
 
                     if request.method == 'POST':
                         new_password=request.POST.get('new_password')
@@ -109,7 +79,7 @@ def change_password(request,token):
                             return redirect(f'/change password/{token}/')
 
                             
-                        user_obj = Customer.objects.get(email=change_password_obj.user.email)
+                        user_obj = Login.objects.get(email=change_password_obj.user.email)
                         user_obj.set_password(new_password)
                         user_obj.save()
                         ChangePassword.objects.filter(forgot_password_token=token).update(status=True)
@@ -142,6 +112,7 @@ def index(request):
 
 def product(request, id):
     products = Product.objects.get(id=id)
+    size = products.get_sizes()
     sub = products.subcategory
     percentage=((products.price-products.offer_price)/products.price)*100
     context = {
@@ -155,13 +126,10 @@ def product(request, id):
 
 def shop(request,id):
     category = Category.objects.get(id=id)
-    
     products = Product.objects.filter(subcategory__category = category)
-    
     context = {
         "category":category,
         "products":products,
-        # "subcategory":subcategory
     }
     return render(request, "web/shop-left-sidebar.html", context)
 
@@ -171,17 +139,17 @@ def shop(request,id):
 def addtowishlist(request,id):
         
         if request.user.is_authenticated:
-            if Customer.objects.get(user = request.user):
+            if Login.objects.get(user = request.user):
                 print(request.user)
                 product = Product.objects.get(id=id)  
                 if product:
-                    cust = Customer.objects.get(user=request.user)
+                    cust = Login.objects.get(user=request.user)
                     if Wishlist.objects.filter(user=cust,product=product):
                     
                         messages.warning(request, "product is already in wishlist...")
                         return redirect('/') 
                     else:
-                        user = Customer.objects.get(user=request.user)
+                        user = Login.objects.get(user=request.user)
                         Wishlist.objects.create(user=user,product=product)
                         messages.warning(request, "Product added successfully...")   
                         return redirect('/') 
@@ -204,9 +172,9 @@ def addtowishlist(request,id):
 
 def viewwishlist(request):
     if request.user.is_authenticated:
-        if Customer.objects.get(user = request.user):
+        if Login.objects.get(user = request.user):
      
-            my_p = Customer.objects.get(user=request.user)
+            my_p = Login.objects.get(user=request.user)
             wished_item = Wishlist.objects.filter(user=my_p)
         
             context= {
@@ -224,7 +192,7 @@ def viewwishlist(request):
 def deletefromwishlist(request,id):
         
                    
-                    user = Customer.objects.get(user=request.user)                              
+                    user = Login.objects.get(user=request.user)                              
                     product = Wishlist.objects.get(user=user,id=id)   
                     
                    
@@ -239,16 +207,16 @@ def deletefromwishlist(request,id):
 def addtocart(request,id):
     if request.user.is_authenticated:
         print(request.user)
-        if Customer.objects.get(user = request.user):
+        if Login.objects.get(user = request.user):
             product = Product.objects.get(id=id)
             price = product.price
             if product:
-                my_p = Customer.objects.get(user=request.user)
+                my_p = Login.objects.get(user=request.user)
                 if AddToCart.objects.filter(user=my_p,product=product):
                     messages.warning(request,"product is already in cart")
                     return redirect('/') 
                 else:  
-                    my_p = Customer.objects.get(user=request.user)
+                    my_p = Login.objects.get(user=request.user)
                     AddToCart.objects.create(user=my_p,product=product,total=price) 
                     messages.warning(request,"Product added successfully")    
                 return redirect('/') 
@@ -266,7 +234,7 @@ def addtocart(request,id):
 def addQuantity(request):
         quantity = request.GET['quantity']
         print(quantity,"%"*20)
-        my_p = Customer.objects.get(user=request.user)
+        my_p = Login.objects.get(user=request.user)
         id = request.GET['id']
         print(id)
         cart_obj = AddToCart.objects.get(id=id,user=my_p)
@@ -294,7 +262,7 @@ def addQuantity(request):
 def lessQuantity(request):
     quantity = request.GET['quantity']
     
-    my_p = Customer.objects.get(user=request.user)
+    my_p = Login.objects.get(user=request.user)
     
     id = request.GET['id']
     cart_obj = AddToCart.objects.get(id=id,user=my_p)
@@ -314,7 +282,7 @@ def viewcart(request):
     if request.user.is_authenticated:
         if request.user:
             
-            my_p = Customer.objects.get(user=request.user)
+            my_p = Login.objects.get(user=request.user)
             sub_total = AddToCart.objects.filter(user__user=(request.user)).aggregate(Sum('total'))
             carted_item = AddToCart.objects.filter(user=my_p)
             
@@ -333,10 +301,9 @@ def viewcart(request):
 
 @csrf_exempt
 def whatsappFun(request):
-    
         messagestring = ''
         grandtotal=0
-        customer = Customer.objects.get(user=request.user)
+        customer = Login.objects.get(user=request.user)
         cart_obj = AddToCart.objects.filter(user=customer)
         if Measurements.objects.filter(user=customer):
             measurement = Measurements.objects.filter(user=customer)
@@ -416,7 +383,7 @@ def whatsappFun(request):
 
 def deletefromcart(request,id):                
                   
-                    user = Customer.objects.get(user=request.user)                              
+                    user = Login.objects.get(user=request.user)                              
                     product = AddToCart.objects.get(user=user,id=id)   
                     product.delete()
                     messages.warning(request, "Product removed successfully...") 
@@ -426,10 +393,10 @@ def deletefromcart(request,id):
 def checkout(request):
     return render(request, "web/checkout.html")
     # if request.user.is_authenticated:
-    #     if Customer.objects.get(user = request.user):
+    #     if Login.objects.get(user = request.user):
             
         
-    #         my_p = Customer.objects.get(user=request.user)
+    #         my_p = Login.objects.get(user=request.user)
     #         carted_item = AddToCart.objects.filter(user=my_p)
        
     #         context= {
@@ -678,8 +645,24 @@ def shop_top_filter(request):
 
 
 def sign_up(request):
-    context = {}
-    return render(request, "web/sign-up.html", context)
+    if request.method == 'POST':
+        customer_name = request.POST.get('fullname')
+        email = request.POST.get('email')
+        number = request.POST.get('number')
+        address = request.POST.get('address')
+        password = request.POST.get('password')
+        password2 = request.POST.get('password2')
+        
+        if password == password2:
+            if Login.objects.get(customer_name=customer_name):
+                messages.error(request, "username is exist please enter another name...") 
+            else:
+                l=Login.objects.create(customer_name=customer_name, password=password, phone_number=number, email=email, address=address)
+                l.save()
+        else:
+            messages.error(request, "password is not matching...") 
+    else:   
+        return render(request, "web/sign-up.html")
 
 
 def user_dashboard(request):
@@ -698,7 +681,7 @@ def size(request):
     size = request.GET['sizeoption']
     product = Product.objects.get(id=id)
     print(product,"product")
-    customer = Customer.objects.get(user=request.user)
+    customer = Login.objects.get(user=request.user)
     Size.objects.create(user=customer,product=product,size=size)
     data = {
         "ff":"hgyh"
@@ -708,8 +691,8 @@ def size(request):
 def measurements(request,id):
     product = Product.objects.get(id=id)
     if request.user.is_authenticated:
-        if Customer.objects.get(user = request.user):
-            customer = Customer.objects.get(user=request.user)
+        if Login.objects.get(user = request.user):
+            customer = Login.objects.get(user=request.user)
             sleevelength = request.POST.get("sleevelength")
             chestaround = request.POST.get("chestaround")
             waistAround = request.POST.get("waistAround")
@@ -728,7 +711,7 @@ def measurements(request,id):
 def event(request):
     date = request.GET['eventdate']
     id = request.GET['id']
-    customer = Customer.objects.get(user=request.user)
+    customer = Login.objects.get(user=request.user)
     product = Product.objects.get(id=id)
     event=Event.objects.create(user=customer,product=product,date=date)
     event.save()
