@@ -1,8 +1,3 @@
-from django import forms
-from django.forms.widgets import TextInput, EmailInput, Textarea
-from user.models import Login
-
-
 # class LoginRegister(forms.ModelForm):
 #     class Meta:
 #         model = Login
@@ -14,6 +9,3 @@ from user.models import Login
 #             'email': EmailInput(attrs={'class':'form-control','name':'email','placeholder':'Email','required':'required','autocomplete':'off',}),
 #             'address':Textarea(attrs={'class':'form-control','name':'address','placeholder':'Full Address','required':'required','autocomplete':'off',}),
 #        }
-   
-
-
